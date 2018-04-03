@@ -1,11 +1,20 @@
+##
+##Modified version of the code from:
+##https://github.com/broadinstitute/BipolarCell2016
+##
+##All credit to the Authors of that package (K Shekhar)
+##Also included is the license they published under
+##
+
 library(Matrix)
 library(reshape)
 library(igraph)
 library(RANN)
-##BASED ON BIPOLAR PAPER CODE!
 
-##
-##Modifies Karthiks approach to cluster!
+
+##Feed in a matrix, X, with rows corresponding to cells and columns to PCs
+##the number of nearest neighbors to use (nn), and specify the type (louvain or infomap)
+##Returns the associated clustering.
 clust_Graph<-function(X,nn,getGraph=FALSE,type="louvain")
 {
 
@@ -57,6 +66,8 @@ return(clust)
 
 }
 
+
+##Same as above, except takes in a seurat object, and number of PCs (numPC) to use, and returns a seurat object with the clustering added to the data.info dataframe and in the ident variable.
 clustGraph_Seurat<-function(seur,nn=50,numPC=7,type="louvain",lstPC=c())
 {
 

@@ -1,11 +1,10 @@
 library(useful)
 library(reshape)
 library(Seurat)
-#source("~/SingleCell/niceDraw.R")
-print("Loaded!")
 library(Rtsne)
 
-
+##Performs TSNE on the seurat object for the specified number of pc and perplexity.
+##Note normalizes the PCA by the standard deviation, since earlier versions of Seurat did not do this.
 getTSNE<-function(seur,numPC,perp=30,lstPC=c())
 {
 X=seur@pca.rot[1:numPC]

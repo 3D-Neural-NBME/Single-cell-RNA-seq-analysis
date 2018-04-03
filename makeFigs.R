@@ -8,6 +8,12 @@ library(NMF)
 library(reshape)
 library(cowplot)
 
+
+
+##For a seurat object seur containing our data of interest (namely the organoid data, already processed)
+##produces the figures in the paper (and other figures as well).
+##Note this relies on outside data objects produced from published datasets, but due to space restraints on Github we do not
+##include them here.
 genFigures<-function(seur,outdir="outdir")
 {
 backup=seur

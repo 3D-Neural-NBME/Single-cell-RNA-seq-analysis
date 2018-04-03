@@ -1,6 +1,7 @@
-source("~/SingleCell/load_Seurat3.R")
+library(Seurat)
 
-
+##Given two seurat objects, takes the average of the clusters in both 
+##and looks at the correlation using the genes specified by the genes argument.
 
 getCOR<-function(seur1,seur2,useAve=T,genes=c())
 {
