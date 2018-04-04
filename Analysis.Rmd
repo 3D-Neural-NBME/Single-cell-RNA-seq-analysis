@@ -78,7 +78,8 @@ lst[c(7,10)]="Astrocytes"
 lst[8]="Inhibitory Neurons"
 lst[11]="Neuroepithelial"
 lst[c(1,2,12)]="Neurons"
-lst[c(3:6,9)]
+lst[c(3:6,9)]="Radial Glia"
+seur@data.info["CellType"]=lst[as.numeric(as.character(seur@ident))]
 ```
 
 
