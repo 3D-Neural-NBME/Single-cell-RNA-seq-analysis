@@ -1,0 +1,109 @@
+##Analysing the data
+
+We begin by importing all needed packages and scripts
+
+
+
+```{r,results=FALSE, warning=FALSE,message=FALSE}
+library(NMF)
+library(cowplot)
+library(ggplot2)
+library(Seurat)
+library(Matrix)
+source("Clust_Graph.R")
+source("heatmap.R")
+source("niceDraw.R")
+source("TSNE.R")
+```
+
+
+We also load the expression matrix. Note this matrix is already filtered and normalized to log(CPM+1).
+
+```{r}
+load("data/dat.Robj")
+load("data/meta.Robj")
+```
+
+We then generate our Seurat object and move it through the standard pipeline.
+
+```{r}
+#Setup object
+seur<-new("seurat",raw.data=dat)
+seur<-Setup(seur,"Organoid",do.scale=F,do.center=F,do.logNormalize=F,min.genes=0,min.cells=0)
+
+#Add metadata
+seur@data.info[colnames(meta)]=meta[names(seur@ident),]
+
+#Calculate variable genes
+seur<-MeanVarPlot(seur,x.low.cutoff=1)
+
+#Regress out covariates
+seur<-RegressOut(seur,c("nGene","mito"),genes.regress=seur@var.genes)
+
+#Run PCA
+seur<-PCAFast(seur)
+PCElbowPlot(seur)
+```
+
+Based on the elbowplot, we decide to use 13 pc's to perform TSNE and clustering.
+
+```{r}
+seur<-getTSNE(seur,numPC=13)
+seur<-clustGraph_Seurat(seur,100,13)
+TSNEPlot(seur,T)
+```
+
+
+This gives use the clustering we want. We can then look at marker genes to identify the clusters:
+
+```{r}
+#Marker for neurons
+niceFeaturePlot(seur,"hg19_SNAP25",low="blue")
+
+#Marker for cycling cells
+niceFeaturePlot(seur,"hg19_TOP2A",low="blue")
+
+#Marker for astrocytes
+niceFeaturePlot(seur,"hg19_GFAP",low="blue")
+
+#Neuroepithelial
+niceFeaturePlot(seur,"hg19_COL1A2")
+
+#Inhibitory Neurons
+niceFeaturePlot(seur,"hg19_GAD2")
+
+##Map cluster numbers to cell types
+lst<-rep("CellType",12)
+lst[c(7,10)]="Astrocytes"
+lst[8]="Inhibitory Neurons"
+lst[11]="Neuroepithelial"
+lst[c(1,2,12)]="Neurons"
+lst[c(3:6,9)]
+```
+
+
+
+Note that these are only come of the markers we used, see makeFigs.R for a more complete list. Note that makeFigs.R does not run, since we did not include all datsets required (due to space constraints), though they are all available from their perspective publications.
+
+
+Due to size restrictions, we did not include all datasets we compared the Organoids against, only one (the Pollen dataset). 
+
+```{r}
+#Load the label used in the paper
+seur<-SetAllIdent(seur,"CellType_ext")
+
+#Load pollen data
+load("data/Pollen.Robj")
+
+#Perform analysis
+COR=getCOR(seur,Pollen)
+ann=data.frame(factor(rev(c(3,4,4,4,4,4))))
+colnames(ann)="Lane"
+COR=data.frame(COR)[,rev(c(4,5,2,1,6,3))]
+COR=data.frame(COR)[c(4,2,1,3),]
+aheatmap(t(COR),Rowv=seq(ncol(COR),1),Colv=seq(nrow(COR),1),annRow=ann)
+```
+
+
+
+
